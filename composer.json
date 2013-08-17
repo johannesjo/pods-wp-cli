@@ -1,12 +1,30 @@
 {
 	"name": "pods-framework/pods-wp-cli",
-	"description": "Pods WP-CLI commands",
+    "type": "command",
+	"description": "WordPress Pods WP-CLI commands",
+    "keywords": ["wp-cli", "pods", "wordpress"],
 	"homepage": "https://github.com/pods-framework/pods-wp-cli",
-	"license": "GPLv2",
 	"require": {
 		"php": ">=5.3",
         "wp-cli/wp-cli": "dev-master"
 	},
+	"license": "MIT",
+    "authors": [
+        {
+            "name": "Pods Framework Team",
+            "email": "contact@pods.io",
+            "homepage": "http://pods.io/"
+        },
+        {
+            "name": "Scott Kingsley Clark",
+            "email": "lol@scottkclark.com",
+            "homepage": "http://scottkclark.com"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/pods-framework/pods-wp-cli/issues",
+        "source": "https://github.com/pods-framework/pods-wp-cli"
+    },
 	"autoload": {
 		"files": [ "Pods_Command.php", "PodsAPI_Command.php" ]
 	}
