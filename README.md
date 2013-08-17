@@ -10,7 +10,7 @@ Importing and Exporting methods are still in development.
 ### Requirements
 
 * [Composer](http://getcomposer.org/)
-* [WP-CLI](http://wp-cli.org)
+* [WP-CLI](http://wp-cli.org) 0.10 or newer
 * [PHP](http://php.net/) 5.3 or newer
 * [WordPress](http://wordpress.org/) 3.5 or newer
 

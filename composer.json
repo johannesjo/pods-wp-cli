@@ -6,7 +6,7 @@
 	"homepage": "https://github.com/pods-framework/pods-wp-cli",
 	"require": {
 		"php": ">=5.3",
-        "wp-cli/wp-cli": "dev-master"
+        "wp-cli/wp-cli": ">=0.10"
 	},
 	"license": "MIT",
     "authors": [
