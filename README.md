@@ -3,7 +3,7 @@
 
 This is a package that implements the `wp pods` and `wp pods-api` commands for [WP-CLI](http://wp-cli.org).
 
-It provides access to the primary add/update/duplicate/delete functionality for the [Pods Framework](http://pods.io).
+It provides access to add/save/duplicate/delete in the Pods class and add_pod/save_pod/duplicate_pod/reset_pod/delete_pod in the PodsAPI class in the [Pods Framework](http://pods.io).
 
 Importing and Exporting methods are still in development.
 
