@@ -9,8 +9,10 @@ Importing and Exporting methods are still in development.
 
 ### Requirements
 
-* PHP 5.3 or newer
-* WordPress 3.5 or newer
+* [Composer](http://getcomposer.org/)
+* [WP-CLI](http://wp-cli.org)
+* [PHP](http://php.net/) 5.3 or newer
+* [WordPress](http://wordpress.org/) 3.5 or newer
 
 ### Installation
 
