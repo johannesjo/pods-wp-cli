@@ -58,7 +58,7 @@ ID: 125
 $ wp pods-api save-pod --name=apple --label="Apple Types" --singular_label="Apple Type"
 Pod saved
 ID: 125
-$ wp pods-api duplicate --name=apple
+$ wp pods-api duplicate --name=apple --new_name=apple2
 Pod duplicated
 New ID: 126
 $ wp pods-api reset --name=apple
