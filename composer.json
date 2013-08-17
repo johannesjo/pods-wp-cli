@@ -1,0 +1,12 @@
+{
+	"name": "pods-framework/pods-wp-cli",
+	"description": "Start a development server for WordPress",
+	"homepage": "https://github.com/pods-framework/pods-wp-cli",
+	"license": "GPLv2",
+	"require": {
+		"php": ">=5.3"
+	},
+	"autoload": {
+		"files": [ "Pods_Command.php", "PodsAPI_Command.php" ]
+	}
+}

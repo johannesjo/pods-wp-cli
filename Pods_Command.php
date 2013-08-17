@@ -1,5 +1,5 @@
 <?php
-if ( class_exists( 'WP_CLI_Command' ) ) {
+if ( class_exists( 'WP_CLI_Command' ) && function_exists( 'pods_api' ) ) {
     /**
      * Implements Pods command for WP-CLI
      */
@@ -66,20 +66,6 @@ if ( class_exists( 'WP_CLI_Command' ) ) {
          *
          * @synopsis --pod=<pod> --item=<item>
          */
-        function delete ( $args, $assoc_args ) {
-            $deleted = pods( $assoc_args[ 'pod' ], $assoc_args[ 'item' ] )->delete();
-
-            if ( $deleted )
-                WP_CLI::success( __( 'Pod item deleted', 'pods' ) );
-            else
-                WP_CLI::error( __( 'Error deleting pod item', 'pods' ) );
-        }
-
-        /**
-         *
-         *
-         * @synopsis --pod=<pod> --item=<item>
-         */
         function duplicate ( $args, $assoc_args ) {
             $id = pods( $assoc_args[ 'pod' ], $assoc_args[ 'item' ] )->duplicate();
 
@@ -89,6 +75,20 @@ if ( class_exists( 'WP_CLI_Command' ) ) {
             }
             else
                 WP_CLI::error( __( 'Error duplicating pod item', 'pods' ) );
+        }
+
+        /**
+         *
+         *
+         * @synopsis --pod=<pod> --item=<item>
+         */
+        function delete ( $args, $assoc_args ) {
+            $deleted = pods( $assoc_args[ 'pod' ], $assoc_args[ 'item' ] )->delete();
+
+            if ( $deleted )
+                WP_CLI::success( __( 'Pod item deleted', 'pods' ) );
+            else
+                WP_CLI::error( __( 'Error deleting pod item', 'pods' ) );
         }
 
         /**

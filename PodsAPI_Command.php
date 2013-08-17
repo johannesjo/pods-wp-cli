@@ -1,5 +1,5 @@
 <?php
-if ( class_exists( 'WP_CLI_Command' ) ) {
+if ( class_exists( 'WP_CLI_Command' ) && function_exists( 'pods_api' ) ) {
     /**
      * Implements PodsAPI command for WP-CLI
      */
@@ -46,15 +46,17 @@ if ( class_exists( 'WP_CLI_Command' ) ) {
          *
          *
          * @synopsis --<field>=<value>
-         * @subcommand delete-pod
+         * @subcommand duplicate-pod
          */
-        function delete_pod ( $args, $assoc_args ) {
-            $deleted = pods_api()->delete_pod( $assoc_args );
+        function duplicate_pod ( $args, $assoc_args ) {
+            $id = pods_api()->duplicate_pod( $assoc_args );
 
-            if ( $deleted )
-                WP_CLI::success( __( 'Pod deleted', 'pods' ) );
+            if ( 0 < $id ) {
+                WP_CLI::success( __( 'Pod duplicated', 'pods' ) );
+                WP_CLI::line( "New ID: {$id}" );
+            }
             else
-                WP_CLI::error( __( 'Error deleting pod', 'pods' ) );
+                WP_CLI::error( __( 'Error duplicating pod', 'pods' ) );
         }
 
         /**
@@ -67,7 +69,7 @@ if ( class_exists( 'WP_CLI_Command' ) ) {
             $reset = pods_api()->reset_pod( $assoc_args );
 
             if ( $reset )
-                WP_CLI::success( __( 'Pod reset', 'pods' ) );
+                WP_CLI::success( __( 'Pod content reset', 'pods' ) );
             else
                 WP_CLI::error( __( 'Error resetting pod', 'pods' ) );
         }
@@ -76,17 +78,15 @@ if ( class_exists( 'WP_CLI_Command' ) ) {
          *
          *
          * @synopsis --<field>=<value>
-         * @subcommand duplicate-pod
+         * @subcommand delete-pod
          */
-        function duplicate_pod ( $args, $assoc_args ) {
-            $id = pods_api()->duplicate_pod( $assoc_args );
+        function delete_pod ( $args, $assoc_args ) {
+            $deleted = pods_api()->delete_pod( $assoc_args );
 
-            if ( 0 < $id ) {
-                WP_CLI::success( __( 'Pod duplicated', 'pods' ) );
-                WP_CLI::line( "New ID: {$id}" );
-            }
+            if ( $deleted )
+                WP_CLI::success( __( 'Pod deleted', 'pods' ) );
             else
-                WP_CLI::error( __( 'Error duplicating pod', 'pods' ) );
+                WP_CLI::error( __( 'Error deleting pod', 'pods' ) );
         }
 
         /**
