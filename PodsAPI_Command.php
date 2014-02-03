@@ -5,41 +5,51 @@
  */
 class PodsAPI_Command extends WP_CLI_Command
 {
-
-    public $field_types = [
-        'text',
-        'website',
-        'phone',
-        'email',
-        'password',
-        'paragraph',
-        'wysiwyg',
-        'code',
-        'datetime',
-        'date',
-        'time',
-        'number',
-        'currency',
-        'file',
-        'pick',
-        'boolean',
-        'color'
+    public $default_field_args = [
+        'label',
+        'type' => [
+            'text',
+            'website',
+            'phone',
+            'email',
+            'password',
+            'paragraph',
+            'wysiwyg',
+            'code',
+            'datetime',
+            'date',
+            'time',
+            'number',
+            'currency',
+            'file',
+            'pick',
+            'boolean',
+            'color'
+        ],
+        'description',
+        'required' => [
+            true,
+            false
+        ],
+        'unique' => [
+            true,
+            false
+        ],
     ];
+
 
     public $input_fields_tmp;
 
     function last_id()
     {
-        return pods_api()->last - id();
+//        return pods_api()->last - id();
     }
 
 
     function handle_cmd_inp($msg = "input: ", $default_action = "returning (default)")
     {
         echo $msg . "\n";
-
-        $line = fgets(STDIN);;
-
+        $line = trim(fgets(STDIN));
         if (trim($line) == '') {
             echo "$line\n";
             echo "No input! $default_action\n";
@@ -48,6 +58,13 @@ class PodsAPI_Command extends WP_CLI_Command
             return $line;
         }
     }
+
+
+    /**
+     * @param $pod_id
+     * @param $field_args
+     * @return array
+     */
 
     function create_fields($pod_id, $field_args)
     {
@@ -62,10 +79,21 @@ class PodsAPI_Command extends WP_CLI_Command
             ];
 
             foreach ($field_args as $key => $val) {
+                // handle fields with options
                 if (is_array($val)) {
                     $msg = "Enter number for $name $key";
                     for ($i = 0; $i < count($val); $i++) {
-                        $msg .= "\n" . ($i + $list_start_index) . ": $val[$i]";
+                        // change displayed val
+                        if ($val[$i] === true) {
+                            $displayed_val = 'true';
+                        } else if ($val[$i] === false) {
+                            $displayed_val = 'false';
+                        } else {
+                            $displayed_val = $val[$i];
+                        }
+
+                        $msg .= "\n" . ($i + $list_start_index)
+                            . ": $displayed_val";
                     }
                     $inp = intval($this->handle_cmd_inp($msg));
 
@@ -78,13 +106,17 @@ class PodsAPI_Command extends WP_CLI_Command
                     $field[$key] = $val[$inp - $list_start_index];
 
                 } else {
-                    $inp = $this->handle_cmd_inp("Enter value for $name $key");
-                    $field[$key] = $inp;
+                    // handle other fields
+                    $inp = $this->handle_cmd_inp("Enter value for field '$name'-$val");
+                    print $val . '  #### ' . $inp;
+                    $field[$val] = $inp;
                 }
             };
-
             // save field
             $this->save_field($field);
+            echo "Created $name:\n";
+            print_r($field_args);
+
 
             // add another field
             $name = $this->handle_cmd_inp('Enter name for field:');
@@ -104,11 +136,7 @@ class PodsAPI_Command extends WP_CLI_Command
         $arg_pods['name'] = $this->handle_cmd_inp("Enter pod name");
         $pod_id = $this->add_pod(null, $arg_pods);
 
-        $field_args = [
-            'type' => $this->field_types
-        ];
-
-        $this->create_fields($pod_id, $field_args);
+        $this->create_fields($pod_id, $this->default_field_args);
     }
 
     /**
