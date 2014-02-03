@@ -75,7 +75,7 @@ class PodsAPI_Command extends WP_CLI_Command
             // add fields
             $fields = "";
             foreach ($field_names as $field_name) {
-                $fields .= "    '$field_name' => $pod_name"
+                $fields .= "    '$field_name' => $$pod_name"
                     . "->field('$field_name'),\n";
             }
             $tmpl = str_replace('/*fields*/', $fields, $tmpl);
