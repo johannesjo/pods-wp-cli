@@ -5,8 +5,14 @@
  */
 class PodsAPI_Command extends WP_CLI_Command
 {
+    public $basic_fields = [
+//        [
+//            'name' => 'post-title',
+//            'type' => 'text'
+//        ]
+    ];
     public $default_field_args = [
-        'label',
+//        'label',
         'type' => [
             'text',
             'website',
@@ -37,22 +43,17 @@ class PodsAPI_Command extends WP_CLI_Command
         ],
     ];
 
+    public $tmpl_files = [
+        'single' => "tmpl-single.php"
+    ];
 
-    public $input_fields_tmp;
-
-    function last_id()
+    function handle_cmd_inp($msg = "input: ", $default_action = "skipping (default)")
     {
-//        return pods_api()->last - id();
-    }
-
-
-    function handle_cmd_inp($msg = "input: ", $default_action = "returning (default)")
-    {
-        echo $msg . "\n";
+        echo "\n" . $msg . "\n";
         $line = trim(fgets(STDIN));
         if (trim($line) == '') {
             echo "$line\n";
-            echo "No input! $default_action\n";
+            echo "No input! $default_action";
             return null;
         } else {
             return $line;
@@ -60,22 +61,81 @@ class PodsAPI_Command extends WP_CLI_Command
     }
 
 
+    function create_tmpl_file($pod_name, $field_names)
+    {
+        $inp = $this->handle_cmd_inp("Create template files? (yes/no)");
+        if ($inp === "yes" || $inp === "y") {
+            $base_tmpl = file_get_contents(dirname(__FILE__)
+                . '/'
+                . $this->tmpl_files['single']);
+
+            // add custom name
+            $tmpl = str_replace('pod_name', $pod_name, $base_tmpl);
+
+            // add fields
+            $fields = "";
+            foreach ($field_names as $field_name) {
+                $fields .= "    '$field_name' => $pod_name"
+                    . "->field('$field_name'),\n";
+            }
+            $tmpl = str_replace('/*fields*/', $fields, $tmpl);
+
+            $tmpl_file = "single-$pod_name.php";
+            $tmpl_file_path = get_template_directory()
+                . '/'
+                . $tmpl_file;
+
+
+            if (!file_exists($tmpl_file_path)) {
+                $this->write_file($tmpl_file, $tmpl_file_path, $tmpl);
+            } else {
+                $inp = $this->handle_cmd_inp("Create template files? (yes/no)");
+                if ($inp === "yes" || $inp === "y") {
+                    $this->write_file($tmpl_file, $tmpl_file_path, $tmpl);
+                }
+            }
+        }
+    }
+
+    function write_file($tmpl_file, $tmpl_file_path, $tmpl)
+    {
+        // create file
+        if (file_put_contents($tmpl_file_path, $tmpl)) {
+            echo "Basic template file '$tmpl_file' created in '$tmpl_file_path'\n\n";
+        } else {
+            echo "An error occured while writing the file.\n";
+        }
+
+    }
+
+
+    function create_basic_fields($pod_id)
+    {
+        foreach ($this->basic_fields as $field) {
+            $field['pod_id'] = $pod_id;
+            $this->save_field($field);
+            print_r($field);
+        }
+    }
+
     /**
      * @param $pod_id
      * @param $field_args
      * @return array
      */
 
-    function create_fields($pod_id, $field_args)
+    function create_custom_fields($pod_id, $field_args)
     {
-        $name = $this->handle_cmd_inp('Enter name for field:');
+        $name = $this->handle_cmd_inp('Enter name for custom-field (leave empty to continue):');
         $names = [];
         $list_start_index = 1;
         while (isset($name) && $name !== '') {
             $names[] = $name;
             $field = [
                 'pod_id' => $pod_id,
-                'name' => $name
+                'name' => $name,
+                'title' => 'title',
+
             ];
 
             foreach ($field_args as $key => $val) {
@@ -101,22 +161,19 @@ class PodsAPI_Command extends WP_CLI_Command
                         echo "out of range";
                         $inp = intval($this->handle_cmd_inp($msg));
                     }
-
                     // save field
                     $field[$key] = $val[$inp - $list_start_index];
 
                 } else {
                     // handle other fields
-                    $inp = $this->handle_cmd_inp("Enter value for field '$name'-$val");
+                    $inp = $this->handle_cmd_inp("Enter value for field '$name'-$val (leave empty to skip)");
                     print $val . '  #### ' . $inp;
                     $field[$val] = $inp;
                 }
             };
             // save field
             $this->save_field($field);
-            echo "Created $name:\n";
-            print_r($field_args);
-
+            echo "Created field '$name'!\n";
 
             // add another field
             $name = $this->handle_cmd_inp('Enter name for field:');
@@ -127,6 +184,7 @@ class PodsAPI_Command extends WP_CLI_Command
 
     /**
      * @subcommand create-custom-post-type
+     * @alias cp
      */
 
     function create_custom_post_type()
@@ -136,7 +194,9 @@ class PodsAPI_Command extends WP_CLI_Command
         $arg_pods['name'] = $this->handle_cmd_inp("Enter pod name");
         $pod_id = $this->add_pod(null, $arg_pods);
 
-        $this->create_fields($pod_id, $this->default_field_args);
+        $this->create_basic_fields($pod_id);
+        $field_names = $this->create_custom_fields($pod_id, $this->default_field_args);
+        $this->create_tmpl_file($arg_pods['name'], $field_names);
     }
 
     /**
@@ -220,14 +280,6 @@ class PodsAPI_Command extends WP_CLI_Command
 
     function save_field($params, $table_operation = true, $sanitized = false, $db = true)
     {
-//        $params = array(
-//            'id' => 0,
-//            'pod_id' => 13,
-//            'name' => 'test',
-//            'label' => 'testlabel',
-//            'description' => '',
-//            'type' => 'text'
-//        );
         $saved = pods_api()->save_field($params, $table_operation, $sanitized, $db);
 
         if ($saved)
@@ -235,70 +287,6 @@ class PodsAPI_Command extends WP_CLI_Command
         else
             WP_CLI::error(__('Error saving field', 'pods'));
     }
-
-
-    /**
-     *
-     *
-     * @synopsis --pod=<pod> --file=<file>
-     * @subcommand export-pod
-     */
-    /*function export_pod ( $args, $assoc_args ) {
-        $data = pods_api()->load_pod( array( 'name' => $assoc_args[ 'pod' ] ) );
-
-        if ( !empty( $data ) ) {
-            $data = json_encode( $data );
-
-            // @todo write to file
-        }
-
-        // @todo success message
-    }*/
-
-    /**
-     *
-     *
-     * @synopsis --file=<file>
-     * @subcommand import-pod
-     */
-    /*function import_pod ( $args, $assoc_args ) {
-        $data = ''; // @todo get data from file
-
-        $package = array();
-
-        if ( !empty( $data ) )
-            $package = @json_decode( $data, true );
-
-        if ( is_array( $package ) && !empty( $package ) ) {
-            $api = pods_api();
-
-            if ( isset( $package[ 'id' ] ) )
-                unset( $package[ 'id' ] );
-
-            $try = 1;
-            $check_name = $package[ 'name' ];
-
-            while ( $api->load_pod( array( 'name' => $check_name, 'table_info' => false ), false ) ) {
-                $try++;
-                $check_name = $package[ 'name' ] . $try;
-            }
-
-            $package[ 'name' ] = $check_name;
-
-            $id = $api->save_pod( $package );
-
-            if ( 0 < $id ) {
-                WP_CLI::success( __( 'Pod imported', 'pods' ) );
-                WP_CLI::line( "ID: {$id}" );
-            }
-            else
-                WP_CLI::error( __( 'Error importing pod', 'pods' ) );
-        }
-        else
-            WP_CLI::error( __( 'Invalid package, Pod not imported', 'pods' ) );
-    }*/
-
-
 }
 
 WP_CLI::add_command('pods-api', 'PodsAPI_Command');

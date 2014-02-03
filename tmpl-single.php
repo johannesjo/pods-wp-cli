@@ -1,6 +1,14 @@
-$project = pods('project', get_the_ID());
-$project->find();
+<?php
+$pod_name = pods('pod_name', get_the_ID());
+$pod_name->find();
 
-$aProject = array(
-'name' => $project->field('name'),
-'url' => get_permalink($project->ID())
+$pod_name = array(
+/*fields*/);
+
+?>
+
+<pre>
+    <?php print_r($pod_name); ?>
+</pre>
+
+
